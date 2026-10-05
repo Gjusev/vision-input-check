@@ -1,0 +1,13 @@
+{
+  "id": "gjusev/vision-input-check-demo",
+  "title": "vision-input-check-demo",
+  "code_file": "script.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": false,
+  "enable_gpu": false,
+  "enable_internet": true,
+  "dataset_sources": [],
+  "competition_sources": [],
+  "kernel_sources": []
+}

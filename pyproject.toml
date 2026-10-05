@@ -1,0 +1,66 @@
+[project]
+name = "vision-input-check"
+version = "0.1.0"
+description = "Regression tests for images sent to vision LLM APIs: pixel-identical and lossy delivery variants, variance-aware scoring, CI gates."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+authors = [{ name = "Gjusev" }]
+keywords = [
+  "vision",
+  "llm",
+  "evaluation",
+  "regression-testing",
+  "image-encoding",
+  "ci",
+  "openai",
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Topic :: Software Development :: Quality Assurance",
+  "Typing :: Typed",
+]
+dependencies = ["Pillow>=10.0"]
+
+[project.optional-dependencies]
+live = ["httpx>=0.27"]
+
+[project.urls]
+Homepage = "https://github.com/Gjusev/vision-input-check"
+Repository = "https://github.com/Gjusev/vision-input-check"
+Changelog = "https://github.com/Gjusev/vision-input-check/releases"
+
+[project.scripts]
+vision-check = "vision_input_check.cli:main"
+
+[dependency-groups]
+dev = ["pytest>=8.0", "ruff>=0.6", "httpx>=0.27"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/vision_input_check"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "RUF"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+  "live: tests that hit a real API; opt-in via VISION_LIVE_TESTS=1, always excluded in CI",
+]
+addopts = "-q"

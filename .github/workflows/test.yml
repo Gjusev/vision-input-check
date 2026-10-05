@@ -1,0 +1,49 @@
+name: Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: uv sync
+      - run: uv run ruff check src tests
+      # Fully offline: live tests are marker-gated AND hard-blocked under CI.
+      - run: uv run pytest -q -m "not live"
+      - name: Demo must fail under default (strict) gates
+        run: |
+          if uv run vision-check demo; then
+            echo "demo with default gates must fail (seeded regression)"; exit 1
+          fi
+      - name: Demo passes with relaxed gates
+        run: uv run vision-check demo --max-identical-delta 0.17 --min-lossy-accuracy 0.8
+
+  wheel-install:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+      - run: uv build
+      - name: Install the built wheel into a clean venv and smoke it
+        run: |
+          uv venv .wheelcheck
+          VIRTUAL_ENV=.wheelcheck uv pip install dist/*.whl
+          .wheelcheck/bin/vision-check demo --max-identical-delta 0.17 --min-lossy-accuracy 0.8
+          .wheelcheck/bin/python - <<'EOF'
+          import vision_input_check
+          from vision_input_check import SCHEMA_VERSION, evaluate_suite
+          assert "site-packages" in vision_input_check.__file__, vision_input_check.__file__
+          print("wheel smoke ok:", vision_input_check.__version__, "schema", SCHEMA_VERSION)
+          EOF

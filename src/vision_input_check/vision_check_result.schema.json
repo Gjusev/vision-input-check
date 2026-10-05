@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/Gjusev/vision-input-check/main/src/vision_input_check/vision_check_result.schema.json",
+  "title": "vision-input-check result",
+  "description": "Output document of vision-check (result.json). Schema version 1.0 evolves additively: existing keys never change name, type, or meaning within the same schema_version.",
+  "type": "object",
+  "required": [
+    "schema_version", "provider", "samples", "runs", "identical_delta_min",
+    "lossy_accuracy_min", "flaky_count", "aggregates", "denominators",
+    "exclusions", "fixtures", "gates"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "const": "1.0" },
+    "provider": {
+      "type": "object",
+      "description": "Public request configuration; never contains secrets.",
+      "properties": {
+        "kind": { "enum": ["replay", "live"] },
+        "model": { "type": "string" },
+        "base_url": { "type": "string", "format": "uri" }
+      },
+      "required": ["kind"]
+    },
+    "samples": { "type": "integer", "minimum": 1, "description": "eligible fixtures x variants x runs" },
+    "runs": { "type": "integer", "minimum": 1 },
+    "identical_delta_min": {
+      "type": ["number", "null"],
+      "description": "Minimum aggregate delta across identical variants other than original; null when no eligible fixtures."
+    },
+    "lossy_accuracy_min": {
+      "type": ["number", "null"],
+      "description": "Minimum aggregate accuracy across lossy variants; null when no eligible fixtures."
+    },
+    "flaky_count": { "type": "integer", "minimum": 0 },
+    "aggregates": {
+      "type": "object",
+      "description": "Per-variant aggregates over eligible fixtures.",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "kind": { "enum": ["identical", "lossy"] },
+          "eligible_fixtures": { "type": "integer", "minimum": 0 },
+          "accuracy": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+          "delta_vs_baseline": { "type": ["number", "null"] }
+        },
+        "required": ["kind", "eligible_fixtures", "accuracy", "delta_vs_baseline"]
+      }
+    },
+    "denominators": {
+      "type": "object",
+      "properties": {
+        "eligible_fixtures": { "type": "integer", "minimum": 0 },
+        "total_fixtures": { "type": "integer", "minimum": 1 },
+        "excluded_flaky": { "type": "integer", "minimum": 0 }
+      },
+      "required": ["eligible_fixtures", "total_fixtures", "excluded_flaky"]
+    },
+    "exclusions": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Fixture ids excluded from strict metrics because original mixed pass/fail."
+    },
+    "fixtures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "fixture_id": { "type": "string" },
+          "flaky": { "type": "boolean" },
+          "flaky_reason": { "type": "string" },
+          "question": { "type": "string" },
+          "expected": { "type": "string" },
+          "variants": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "variant": { "type": "string" },
+                "kind": { "enum": ["identical", "lossy"] },
+                "answers": { "type": "array", "items": { "type": "string" } },
+                "passes": { "type": "array", "items": { "type": "boolean" } },
+                "accuracy": { "type": "number", "minimum": 0, "maximum": 1 },
+                "delta_vs_baseline": { "type": ["number", "null"] },
+                "distinct_answers": { "type": "integer", "minimum": 0 }
+              },
+              "required": ["variant", "kind", "answers", "passes", "accuracy", "delta_vs_baseline"]
+            }
+          }
+        },
+        "required": ["fixture_id", "flaky", "flaky_reason", "variants"]
+      }
+    },
+    "gates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "operator": { "enum": [">=", "<="] },
+          "threshold": { "type": "number" },
+          "observed": { "type": ["number", "null"] },
+          "passed": { "type": "boolean" },
+          "description": { "type": "string" }
+        },
+        "required": ["name", "operator", "threshold", "observed", "passed", "description"]
+      }
+    }
+  }
+}
