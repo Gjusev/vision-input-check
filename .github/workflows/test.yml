@@ -17,13 +17,16 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - run: uv sync
-      - run: uv run ruff check src tests
+      - run: uv run ruff check src tests kaggle-kernel
       # Fully offline: live tests are marker-gated AND hard-blocked under CI.
       - run: uv run pytest -q -m "not live"
-      - name: Demo must fail under default (strict) gates
+      - name: Demo must exit exactly 1 under strict gates
         run: |
-          if uv run vision-check demo; then
-            echo "demo with default gates must fail (seeded regression)"; exit 1
+          status=0
+          uv run vision-check demo || status=$?
+          if [ "$status" -ne 1 ]; then
+            echo "Expected gate failure (exit 1), got $status"
+            exit 1
           fi
       - name: Demo passes with relaxed gates
         run: uv run vision-check demo --max-identical-delta 0.17 --min-lossy-accuracy 0.8

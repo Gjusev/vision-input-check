@@ -7,7 +7,7 @@ test:
 	uv run pytest -q -m "not live"
 
 lint:
-	uv run ruff check src tests
+	uv run ruff check src tests kaggle-kernel
 
 build:
 	uv build

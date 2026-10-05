@@ -15,6 +15,7 @@ The kernel needs the 0.1.0 release to exist on PyPI first. Run it after
 publishing, or pin a wheel URL instead.
 """
 
+import json
 import subprocess
 import sys
 
@@ -36,8 +37,6 @@ completed = subprocess.run(cmd)
 if completed.returncode != 0:
     sys.exit("demo failed unexpectedly; the harness or package version changed")
 
-import json
-
 with open("result.json", encoding="utf-8") as handle:
     result = json.load(handle)
 
@@ -46,7 +45,10 @@ print("=== vision-input-check demo summary (synthetic replay) ===")
 print("identical_delta_min:", result["identical_delta_min"])
 print("lossy_accuracy_min:", result["lossy_accuracy_min"])
 print("flaky_count:", result["flaky_count"])
-print("eligible_fixtures:", result["denominators"]["eligible_fixtures"], "/", result["denominators"]["total_fixtures"])
+print(
+    "eligible_fixtures:", result["denominators"]["eligible_fixtures"],
+    "/", result["denominators"]["total_fixtures"],
+)
 for gate in result["gates"]:
     print("gate", gate["name"], "PASS" if gate["passed"] else "FAIL")
 print()
