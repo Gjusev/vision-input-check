@@ -16,3 +16,4 @@ credentials*
 htmlcov/
 
 brag-output/
+.playwright-mcp/
