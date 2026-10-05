@@ -1,0 +1,3 @@
+[     311ms] TypeError: Cannot set properties of undefined (setting 'main')
+    at http://localhost:8766/index.html:252:34
+[     552ms] [ERROR] Failed to load resource: the server responded with a status of 404 (File not found) @ http://localhost:8766/favicon.ico:0

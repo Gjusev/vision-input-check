@@ -14,3 +14,5 @@ visioncheck-demo/
 credentials*
 .coverage
 htmlcov/
+
+brag-output/
